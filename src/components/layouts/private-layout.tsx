@@ -2,12 +2,17 @@ import { HiOutlineLogout, HiOutlineUser } from 'react-icons/hi'
 import { Outlet, useNavigate } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
+import useAuthStore from '@/store/auth.store'
 
 const PrivateLayout = () => {
   const navigate = useNavigate()
+  const logout = useAuthStore((state) => state.logout)
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token')
+    // Antes el layout eliminaba el token directamente.
+    // localStorage.removeItem('access_token')
+    // Ahora delegamos la limpieza completa de sesion al store.
+    logout()
     void navigate('/auth')
   }
 
