@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import toast from 'react-hot-toast'
 import { HiOutlineUser } from 'react-icons/hi'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import z from 'zod/v3'
 
 import Form from '@/components/shared/form'
@@ -25,8 +25,12 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>
 
 const AuthForm = () => {
+  // Antes el login siempre redirigia de forma fija a /dashboard.
+  const location = useLocation()
   const navigate = useNavigate()
   const loginMutation = useLogin()
+  // Ahora respetamos la ruta de origen guardada por AuthGuard.
+  const redirectTo = location.state?.from?.pathname ?? '/dashboard'
 
   const handleLogin = (data: LoginFormValues) => {
     loginMutation.mutate(
@@ -34,7 +38,9 @@ const AuthForm = () => {
       {
         onSuccess: () => {
           toast.success('Sesión iniciada correctamente')
-          void navigate('/dashboard')
+          // Antes: navigate('/dashboard')
+          // Ahora: si el usuario venia de una privada, vuelve a ese destino.
+          void navigate(redirectTo, { replace: true })
         },
         onError: (error) => {
           toast.error(error.message)
